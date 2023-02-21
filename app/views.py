@@ -5,6 +5,8 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app.models import UserProfile
 from app.forms import LoginForm
+from werkzeug.security import check_password_hash
+from .forms import UploadForm
 
 
 ###
@@ -24,17 +26,23 @@ def about():
 
 
 @app.route('/upload', methods=['POST', 'GET'])
+@login_required
 def upload():
     # Instantiate your form class
-
+    pform = UploadForm()
     # Validate file upload on submit
-    if form.validate_on_submit():
+    if pform.validate_on_submit():
         # Get file data and save to your uploads folder
+        photo = pform.photo.data
+
+        filename = secure_filename(photo.filename)
+
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         flash('File Saved', 'success')
         return redirect(url_for('home')) # Update this to redirect the user to a route that displays all uploaded image files
 
-    return render_template('upload.html')
+    return render_template('upload.html', pform=pform)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -43,17 +51,26 @@ def login():
 
     # change this to actually validate the entire form submission
     # and not just one field
-    if form.username.data:
+    if form.validate_on_submit():
         # Get the username and password values from the form.
+        username = form.username.data
+        password = form.password.data
 
         # Using your model, query database for a user based on the username
+        user = db.session.execute(db.select(UserProfile).filter_by(username=username)).scalar()
         # and password submitted. Remember you need to compare the password hash.
+        if user is not None and check_password_hash(user.password, password):
+
         # You will need to import the appropriate function to do so.
         # Then store the result of that query to a `user` variable so it can be
         # passed to the login_user() method below.
 
         # Gets user id, load into session
-        login_user(user)
+            login_user(user)
+
+            flash('Logged in successfully.')
+
+            return redirect(url_for('upload'))
 
         # Remember to flash a message to the user
         return redirect(url_for("home"))  # The user should be redirected to the upload form instead
