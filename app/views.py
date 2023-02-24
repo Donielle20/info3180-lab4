@@ -1,6 +1,6 @@
 import os
 from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app.models import UserProfile
@@ -22,8 +22,18 @@ def home():
 @app.route('/about/')
 def about():
     """Render the website's about page."""
+    get_uploaded_images()
     return render_template('about.html', name="Mary Jane")
 
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    send_from_directory(os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER']), filename)
+
+@app.route('/files')
+@login_required
+def files():
+    plist = get_uploaded_images()
+    return render_template('files.html', plist = plist)
 
 @app.route('/upload', methods=['POST', 'GET'])
 @login_required
@@ -117,3 +127,19 @@ def add_header(response):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+def get_uploaded_images():
+    rootdir = os.getcwd()
+
+    print(rootdir + app.config['UPLOAD_FOLDER'])
+
+    plist = []
+    
+    for subdir, dirs, files in os.walk(rootdir + app.config['UPLOAD_FOLDER']):
+        for file in files:
+            # print(os.path.join(subdir, file))
+            # print(file)
+            plist.append(file)
+
+    return plist
+
