@@ -27,7 +27,7 @@ def about():
 
 @app.route('/uploads/<filename>')
 def get_image(filename):
-    send_from_directory(os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER']), filename)
+    return send_from_directory(os.path.join(os.getcwd(),app.config['UPLOAD_FOLDER']), filename)
 
 @app.route('/files')
 @login_required
@@ -135,7 +135,8 @@ def get_uploaded_images():
 
     plist = []
     
-    for subdir, dirs, files in os.walk(rootdir + app.config['UPLOAD_FOLDER']):
+    # for subdir, dirs, files in os.walk(rootdir + app.config['UPLOAD_FOLDER']):
+    for subdir, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
         for file in files:
             # print(os.path.join(subdir, file))
             # print(file)
