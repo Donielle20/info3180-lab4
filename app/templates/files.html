@@ -12,7 +12,7 @@
     <body>
         <ul>   
             {% for item in plist %}
-                <li><img src="{{url_for('static', filename='{{ item }}')}}" alt="{{item}}"></li>
+                <li><img src="{{url_for('uploads', filename='{{ item }}')}}" alt="{{item}}"></li>
             {% endfor %}
         </ul>
     </body>
