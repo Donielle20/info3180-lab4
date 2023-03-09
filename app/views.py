@@ -144,3 +144,9 @@ def get_uploaded_images():
 
     return plist
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Logged Out Successfully')
+    return redirect(url_for('home'))
